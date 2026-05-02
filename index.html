@@ -1027,7 +1027,7 @@
             يسمح فقط بإيميلات ahmedmarketing.cloud
           </div>
 
-          <form onsubmit="login(event)">
+          <form onsubmit="return false;">
             <div class="form-group">
               <label>
                 <i class="fas fa-envelope"></i>
@@ -1056,7 +1056,7 @@
               <label for="rememberMe">تذكرني لمدة 30 يوم</label>
             </div>
 
-            <button type="submit" class="btn btn-primary">
+            <button type="button" class="btn btn-primary" onclick="login(event)">
               <span>
                 <i class="fas fa-sign-in-alt"></i>
                 تسجيل الدخول
@@ -1418,7 +1418,10 @@
 
     // Login Function - WITH ENCRYPTION AND TEMP ACCESS CHECK
     async function login(event) {
-      event.preventDefault();
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       
       const email = document.getElementById('emailInput').value.trim().toLowerCase();
       const code = document.getElementById('codeInput').value.trim();
@@ -1429,7 +1432,7 @@
       // Check if email exists
       if (!users[email]) {
         alert("❌ بيانات الدخول غير صحيحة");
-        return;
+        return false;
       }
 
       // Hash the entered code and compare
@@ -1437,20 +1440,20 @@
       
       if (users[email].codeHash !== enteredCodeHash) {
         alert("❌ بيانات الدخول غير صحيحة");
-        return;
+        return false;
       }
 
       // ✅ Check if account is disabled
       if (users[email].status === 'disabled') {
         alert("❌ هذا الحساب معطل. تواصل مع المدير");
-        return;
+        return false;
       }
 
       // ✅ Check temporary access
       const tempAccessInfo = checkTempAccess(users[email]);
       if (!tempAccessInfo.valid && tempAccessInfo.expired) {
         alert("❌ انتهت صلاحية حسابك. تواصل مع المدير لتجديد الصلاحية");
-        return;
+        return false;
       }
 
       // ⚠️ Show warning if access is expiring soon (3 days or less)
@@ -1480,6 +1483,8 @@
       
       // Show publish page by default
       go('publish');
+      
+      return false;
     }
 
     // Logout
@@ -2005,6 +2010,30 @@
     }
 
     window.addEventListener('DOMContentLoaded', loadSavedLogin);
+    
+    // Add Enter key support for login
+    document.addEventListener('DOMContentLoaded', function() {
+      const emailInput = document.getElementById('emailInput');
+      const codeInput = document.getElementById('codeInput');
+      
+      if (emailInput) {
+        emailInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            codeInput.focus();
+          }
+        });
+      }
+      
+      if (codeInput) {
+        codeInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            login(e);
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>
