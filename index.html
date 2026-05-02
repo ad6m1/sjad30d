@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>AI Creator Console - نظام النشر الذكي</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -22,6 +22,7 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -31,6 +32,7 @@
       min-height: 100vh;
       overflow-x: hidden;
       position: relative;
+      touch-action: pan-y;
     }
 
     /* Animated Tech Background */
@@ -326,9 +328,13 @@
       transition: all 0.3s;
       pointer-events: auto;
       z-index: 10;
+      padding: 10px;
+      margin: -10px;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .eye-icon:hover {
+    .eye-icon:hover,
+    .eye-icon:active {
       color: var(--primary);
       text-shadow: 0 0 10px var(--glow);
     }
@@ -1027,7 +1033,7 @@
             يسمح فقط بإيميلات ahmedmarketing.cloud
           </div>
 
-          <form onsubmit="login(event)">
+          <form id="loginForm" onsubmit="return false;">
             <div class="form-group">
               <label>
                 <i class="fas fa-envelope"></i>
@@ -1056,7 +1062,7 @@
               <label for="rememberMe">تذكرني لمدة 30 يوم</label>
             </div>
 
-            <button type="submit" class="btn btn-primary">
+            <button type="button" class="btn btn-primary" onclick="login(event)">
               <span>
                 <i class="fas fa-sign-in-alt"></i>
                 تسجيل الدخول
@@ -1317,6 +1323,14 @@
             status: "active",
             tempAccess: null,
             createdAt: new Date().toISOString()
+          },
+          "sjaad@ahmedmarketing.cloud": {
+            name: "سجاد",
+            codeHash: "d5a65b667f26c7f176a211510a8f6ba639c371b7979ea258d289fd1604ae6c28",
+            role: "user",
+            status: "active",
+            tempAccess: null,
+            createdAt: new Date().toISOString()
           }
         };
         localStorage.setItem(USERS_DB_KEY, JSON.stringify(defaultUsers));
@@ -1373,6 +1387,18 @@
       }
     }
 
+    // Add touch support for mobile
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleIcon = document.getElementById('togglePassword');
+      if (toggleIcon) {
+        toggleIcon.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          togglePasswordVisibility();
+        }, { passive: false });
+      }
+    });
+
     // Save Login Data
     function saveLoginData(email, code) {
       const expiryDate = new Date();
@@ -1410,27 +1436,44 @@
 
     // Login Function - WITH ENCRYPTION AND TEMP ACCESS CHECK
     async function login(event) {
-      event.preventDefault();
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
+      console.log('🔐 Login attempt started');
       
       const email = document.getElementById('emailInput').value.trim().toLowerCase();
       const code = document.getElementById('codeInput').value.trim();
+
+      console.log('📧 Email:', email);
 
       // Get users from shared database
       const users = getUsers();
 
       // Check if email exists
       if (!users[email]) {
+        console.log('❌ User not found');
         alert("❌ بيانات الدخول غير صحيحة");
-        return;
+        return false;
       }
+
+      console.log('✅ User found');
 
       // Hash the entered code and compare
       const enteredCodeHash = await sha256(code);
       
+      console.log('🔒 Hash calculated');
+      
       if (users[email].codeHash !== enteredCodeHash) {
+        console.log('❌ Password mismatch');
+        console.log('Entered hash:', enteredCodeHash);
+        console.log('Stored hash:', users[email].codeHash);
         alert("❌ بيانات الدخول غير صحيحة");
-        return;
+        return false;
       }
+
+      console.log('✅ Password correct');
 
       // ✅ Check if account is disabled
       if (users[email].status === 'disabled') {
@@ -1472,6 +1515,8 @@
       
       // Show publish page by default
       go('publish');
+      
+      return false;
     }
 
     // Logout
@@ -1863,7 +1908,7 @@
             webhookPayload.timezone = 'Asia/Baghdad';
           }
           
-          const webhookResponse = await fetch("https://n8n.srv1099752.hstgr.cloud/webhook/uploadsajad", {
+          const webhookResponse = await fetch("https://n8n.srv1099752.hstgr.cloud/webhook/mkdpublish2026", {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
@@ -1996,7 +2041,34 @@
       document.getElementById('disclaimer').style.display = 'none';
     }
 
-    window.addEventListener('DOMContentLoaded', loadSavedLogin);
+    // Enter key support
+    window.addEventListener('DOMContentLoaded', function() {
+      loadSavedLogin();
+      
+      // Add Enter key listener to code input
+      const codeInput = document.getElementById('codeInput');
+      const emailInput = document.getElementById('emailInput');
+      
+      if (codeInput) {
+        codeInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            login(e);
+          }
+        });
+      }
+      
+      if (emailInput) {
+        emailInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            codeInput.focus();
+          }
+        });
+      }
+      
+      console.log('✅ Event listeners attached');
+    });
   </script>
 </body>
 </html>
