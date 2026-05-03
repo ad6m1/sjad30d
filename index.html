@@ -1939,9 +1939,16 @@
             body: JSON.stringify(webhookPayload)
           });
           
+          console.log('📡 Webhook response status:', webhookResponse.status);
+          console.log('📡 Webhook response OK:', webhookResponse.ok);
+          
           if (webhookResponse.ok) {
+            const webhookResult = await webhookResponse.json();
+            console.log('✅ n8n response:', webhookResult);
             console.log('✅ Sent to n8n successfully');
           } else {
+            const errorText = await webhookResponse.text();
+            console.error('❌ n8n error:', errorText);
             console.warn('⚠️ n8n webhook failed, but continuing...');
           }
         } catch (webhookError) {
