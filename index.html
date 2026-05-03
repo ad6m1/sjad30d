@@ -1105,7 +1105,13 @@
               <i class="fas fa-file-video"></i>
               اختر الفيديو
             </label>
-            <input type="file" id="mediaInput" accept="image/*,video/*">
+            <input type="file" id="mediaInput" accept="image/*,video/*" onchange="checkFileSize(this)">
+            <div style="margin-top: 10px; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; font-size: 13px; color: #10b981;">
+              <i class="fas fa-check-circle"></i>
+              <strong>✅ Pro Plan:</strong> الحد الأقصى لحجم الفيديو: <strong>5 GB (5000 ميجا)</strong>
+              <br>
+              <small>يمكنك رفع فيديوهات كبيرة بدون قلق!</small>
+            </div>
           </div>
 
           <div class="form-group">
@@ -1810,6 +1816,28 @@
       }
     }
 
+    // Check file size when selected
+    function checkFileSize(input) {
+      if (!input.files.length) return;
+      
+      const file = input.files[0];
+      const fileSizeInMB = file.size / 1024 / 1024;
+      const MAX_FILE_SIZE_MB = 5000; // 5 GB for Pro Plan
+      
+      if (fileSizeInMB > MAX_FILE_SIZE_MB) {
+        alert(`⚠️ تحذير: حجم الملف كبير!\n\n` +
+              `الحجم الحالي: ${fileSizeInMB.toFixed(2)} ميجا\n` +
+              `الحد الأقصى: ${MAX_FILE_SIZE_MB} ميجا (5 GB)\n\n` +
+              `الرجاء ضغط الفيديو باستخدام:\n` +
+              `• VideoSmaller.com\n` +
+              `• FreeConvert.com\n` +
+              `• Clideo.com`);
+        input.value = ''; // Clear the file
+      } else {
+        console.log(`✅ File size OK: ${fileSizeInMB.toFixed(2)} MB`);
+      }
+    }
+
     // Publish - WITH SUPABASE STORAGE
     async function publish() {
       const mediaInput = document.getElementById('mediaInput');
@@ -1841,7 +1869,20 @@
 
       const file = mediaInput.files[0];
       const fileName = file.name;
-      const fileSize = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+      const fileSizeInMB = file.size / 1024 / 1024;
+      const fileSize = fileSizeInMB.toFixed(2) + ' MB';
+      
+      // ✅ Check file size (5 GB limit for Supabase Pro Plan)
+      const MAX_FILE_SIZE_MB = 5000; // 5 GB
+      if (fileSizeInMB > MAX_FILE_SIZE_MB) {
+        alert(`❌ حجم الملف كبير جداً!\n\n` +
+              `الحجم الحالي: ${fileSize}\n` +
+              `الحد الأقصى: ${MAX_FILE_SIZE_MB} ميجا (5 GB)\n\n` +
+              `الحل:\n` +
+              `1. استخدم موقع ضغط مثل VideoSmaller.com\n` +
+              `2. أو قسّم الفيديو لأجزاء أصغر`);
+        return;
+      }
       const uniqueFileName = `${Date.now()}_${fileName}`;
       
       const fileType = file.type.startsWith('image/') ? 'image' : 'video';
