@@ -1076,7 +1076,7 @@
         </div>
 
         <!-- Connect Button -->
-        <a href="https://app.upload-post.com/connect?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJyaG0ud29yazFAZ21haWwuY29tIiwicHJvZmlsZV91c2VybmFtZSI6InNqYWQiLCJleHAiOjE3Nzc5Nzg2MjEsImlhdCI6MTc3NzgwNTgyMX0.Z7Ygf9xaoquWGkVnEZJzgzyP7LTdmL1atwFyVAXMeuU">
+        <a href="https://app.upload-post.com/connect?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImJyaG0ud29yazFAZ21haWwuY29tIiwicHJvZmlsZV91c2VybmFtZSI6InNqYWQiLCJleHAiOjE3Nzc5ODIzMTMsImlhdCI6MTc3NzgwOTUxM30.IE4y4pEs3ymmq-KChjMewZOqwgGs8h-H_r2i4-P_8K4">
           <button class="btn btn-connect">
             <span>
               <i class="fas fa-link"></i>
@@ -1111,6 +1111,12 @@
               <strong>✅ Pro Plan:</strong> الحد الأقصى لحجم الفيديو: <strong>5 GB (5000 ميجا)</strong>
               <br>
               <small>يمكنك رفع فيديوهات كبيرة بدون قلق!</small>
+            </div>
+            <div style="margin-top: 10px; padding: 10px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; font-size: 12px; color: #f59e0b;">
+              <i class="fas fa-info-circle"></i>
+              <strong>ملاحظة:</strong> فيديوهات iPhone (MOV) قد لا تعمل على Instagram. 
+              <br>
+              <small>الأفضل: استخدم تطبيق الكاميرا بصيغة MP4 أو حوّل الفيديو قبل الرفع.</small>
             </div>
           </div>
 
@@ -1887,6 +1893,13 @@
       
       const fileType = file.type.startsWith('image/') ? 'image' : 'video';
       const fileTypeArabic = fileType === 'image' ? 'الصورة' : 'الفيديو';
+      
+      // Check if file is MOV (iPhone videos)
+      const isMOV = fileName.toLowerCase().endsWith('.mov') || file.type === 'video/quicktime';
+      if (isMOV) {
+        console.log('⚠️ MOV file detected - Instagram may not accept this format');
+        // Continue anyway - Supabase will accept it
+      }
 
       statusText.innerHTML = `<div class="status loading">جار رفع ${fileTypeArabic} <span class="dots"><span>.</span><span>.</span><span>.</span></span></div>`;
 
